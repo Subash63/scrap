@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+</head>
+<body>
+    <form id="productForm">
+        <label for="product_id">Enter Product ID:</label>
+        <input type="text" id="product_id" name="product_id" required>
+        <button type="button" onclick="scrapeProduct()">Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+<script>
+    function scrapeProduct() {
+        var productId = document.getElementById('product_id').value;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/scrape', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4) {
+                if (xhr.status == 200) {
+                    var result = JSON.parse(xhr.responseText);
+                    displayResult(result);
+                    } 
+                    else {
+                        alert('Failed to fetch product details.');
+                    }
+                }
+            };
+            var formData = 'product_id=' + encodeURIComponent(productId);
+            xhr.send(formData);
+        }
+
+        function displayResult(result) {
+            var resultDiv = document.getElementById('result');
+            var tableHTML = '<table>';
+            tableHTML += '<tr><th>PRODUCT</th><th>DESCRIPTION</th></tr>';
+            tableHTML += '<tr><td>Name</td><td>' + result.name + '</td></tr>';
+            tableHTML += '<tr><td>Price</td><td>' + result.price + '</td></tr>';
+            tableHTML += '<tr><td>ModelandPartNumber</td><td>' + result.ModelandPartNumber + '</td></tr>';
+            tableHTML += '<tr><td>MRPprice</td><td>' + result.MRPprice + '</td></tr>';
+            tableHTML += '<tr><td>Partdescription</td><td>' + result.Partdescription + '</td></tr>';
+            tableHTML += '</table>';
+            resultDiv.innerHTML = tableHTML;
+            var productDescriptionTable = '<table>';
+            
+            for (var i = 0; i < result.Productdescrition[0].length; i += 2) {
+                productDescriptionTable += '<tr><td>' + result.Productdescrition[0][i] + '</td><td>' + result.Productdescrition[0][i + 1] + '</td></tr>';
+            } productDescriptionTable += '</table>';
+            resultDiv.innerHTML += '<h2>Product Description</h2>' + productDescriptionTable;
+            var vehicleFitTable = '<table>';
+                vehicleFitTable += '<tr><th>YearModel</th><th>Engine</th><th>Notes</th></tr>';
+                for (var i = 0; i < result.VehicleFit[1].length; i += 3) {
+                    vehicleFitTable += '<tr>';
+                        for (var j = 0; j < 3;j++) {
+                            vehicleFitTable += '<td>' + result.VehicleFit[1][i + j] + '</td>';
+                        } vehicleFitTable += '</tr>';
+                    } vehicleFitTable += '</table>';
+                    resultDiv.innerHTML += '<h2>Vehicle Fit</h2>' + vehicleFitTable;
+}
+        
+    </script>
+</body>
+</html>
